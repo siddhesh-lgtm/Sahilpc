@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sahil Chaudhary | Creative Technologist</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
+
+  <!-- Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background: #0A0A0A; color: #E0E0E0; scroll-behavior: smooth; overflow-x:hidden; }
+    .font-heading { font-family: 'Orbitron', sans-serif; }
+    .neon-text-lime { text-shadow: 0 0 10px #39FF14, 0 0 20px #39FF14; color:#39FF14; }
+    .neon-text-cyan { text-shadow: 0 0 10px #00FFFF, 0 0 20px #00FFFF; color:#00FFFF; }
+    .neon-text-magenta { text-shadow: 0 0 10px #FF007A, 0 0 20px #FF007A; color:#FF007A; }
+    .glass-card { background: rgba(16,16,16,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+    .neon-btn:hover { transform: translateY(-2px); transition: 0.3s; }
+    .modal { position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(8px); display:flex; justify-content:center; align-items:center; z-index:50; padding:1rem;}
+    .hidden { display:none; }
+  </style>
+</head>
+
+<body class="text-gray-200">
+
+  <!-- HERO -->
+  <section id="hero" class="relative h-screen flex items-center justify-center text-center overflow-hidden">
+    <canvas id="hero3D" class="absolute inset-0"></canvas>
+    <div class="glass-card relative z-10 p-8 rounded-xl">
+      <h1 class="font-heading text-5xl sm:text-6xl font-bold text-white">Sahil Chaudhary <span class="neon-text-lime">STUDIOS</span></h1>
+      <p class="mt-4 text-lg text-gray-300">Creative Technologist · Game Designer · 3D Artist</p>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects" class="py-24 px-6 text-center">
+    <h2 class="font-heading text-4xl sm:text-5xl font-bold text-white neon-text-cyan mb-16">Featured <span class="text-[#00FFFF]">Projects</span></h2>
+    <div id="projectsGrid" class="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about" class="py-24 px-6 glass-card max-w-6xl mx-auto rounded-xl my-20 text-center">
+    <h2 class="font-heading text-4xl sm:text-5xl font-bold mb-10 neon-text-magenta">About <span class="text-[#FF007A]">Me</span></h2>
+    <div class="grid md:grid-cols-2 gap-8 items-center">
+      <canvas id="about3D" class="w-full h-80 bg-transparent"></canvas>
+      <div class="text-left space-y-4">
+        <p>I’m a creative technologist specializing in real-time 3D and generative art. I blend design, code, and storytelling to craft immersive experiences.</p>
+        <p>With expertise in game engines, shaders, and AI-assisted pipelines, I push visual design beyond traditional limits.</p>
+        <a href="#" class="inline-block bg-[#FF007A] text-white font-bold py-3 px-6 rounded-full neon-btn">Download Résumé</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="py-24 px-6 text-center">
+    <h2 class="font-heading text-4xl sm:text-5xl font-bold mb-10 text-white neon-text-lime">Let's Build <span class="text-[#39FF14]">Together</span></h2>
+    <form id="contactForm" class="max-w-lg mx-auto space-y-4 text-left">
+      <input id="name" placeholder="Name" class="w-full p-3 bg-gray-900 border border-gray-700 rounded-lg" />
+      <input id="email" placeholder="Email" class="w-full p-3 bg-gray-900 border border-gray-700 rounded-lg" />
+      <textarea id="message" rows="5" placeholder="Message" class="w-full p-3 bg-gray-900 border border-gray-700 rounded-lg"></textarea>
+      <button type="submit" class="bg-[#39FF14] text-black font-bold py-3 px-8 rounded-full neon-btn w-full">Send Message</button>
+    </form>
+    <p id="statusMsg" class="mt-4 text-[#39FF14] text-center"></p>
+  </section>
+
+  <footer class="text-center py-6 text-gray-500 border-t border-gray-800">
+    &copy; <span id="year"></span> Sahil Chaudhary Studios
+  </footer>
+
+  <!-- MODAL -->
+  <div id="modal" class="modal hidden">
+    <div class="glass-card w-full max-w-3xl rounded-xl overflow-hidden relative p-4">
+      <button id="closeModal" class="absolute top-2 right-2 text-gray-400 hover:text-white text-xl">&times;</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script>
+    /* === 3D HERO === */
+    const heroCanvas = document.getElementById('hero3D');
+    const heroScene = new THREE.Scene();
+    const heroCamera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 1000);
+    const heroRenderer = new THREE.WebGLRenderer({ canvas: heroCanvas, alpha: true });
+    heroRenderer.setSize(innerWidth, innerHeight);
+    const knot = new THREE.Mesh(new THREE.TorusKnotGeometry(1.8, 0.5, 200, 32), new THREE.MeshBasicMaterial({ wireframe: true, color: 0x39FF14 }));
+    heroScene.add(knot);
+    heroCamera.position.z = 5;
+    const animateHero = () => { requestAnimationFrame(animateHero); knot.rotation.x+=0.005; knot.rotation.y+=0.005; heroRenderer.render(heroScene, heroCamera); }; animateHero();
+    addEventListener('resize', () => { heroCamera.aspect=innerWidth/innerHeight; heroCamera.updateProjectionMatrix(); heroRenderer.setSize(innerWidth, innerHeight); });
+
+    /* === ABOUT 3D === */
+    const aboutCanvas = document.getElementById('about3D');
+    const aboutScene = new THREE.Scene();
+    const aboutCamera = new THREE.PerspectiveCamera(50, 1.5, 0.1, 1000);
+    const aboutRenderer = new THREE.WebGLRenderer({ canvas: aboutCanvas, alpha:true });
+    aboutRenderer.setSize(aboutCanvas.clientWidth, aboutCanvas.clientHeight);
+    const ico = new THREE.Mesh(new THREE.IcosahedronGeometry(1.5, 0), new THREE.MeshBasicMaterial({ wireframe:true, color:0xFF007A }));
+    aboutScene.add(ico); aboutCamera.position.z = 4;
+    const animateAbout=()=>{requestAnimationFrame(animateAbout);ico.rotation.x+=0.01;ico.rotation.y+=0.01;aboutRenderer.render(aboutScene,aboutCamera)};animateAbout();
+
+    /* === PROJECTS === */
+    const projects = [
+      {title:'Visual Redemption', img:'https://placehold.co/600x400/FF007A/0A0A0A?text=Redemption', desc:'A real-time VFX showcase exploring cybernetic rebirth.', yt:'dQw4w9WgXcQ', tools:['Unreal Engine','Niagara','HLSL']},
+      {title:'Cyber Deck', img:'https://placehold.co/600x400/39FF14/0A0A0A?text=Cyber+Deck', desc:'A functional cyberdeck prop with Raspberry Pi and retro design.', yt:'bTqVqk7FSmY', tools:['Blender','Fusion 360','3D Printing']},
+      {title:'AI Neural Hub', img:'https://placehold.co/600x400/00FFFF/0A0A0A?text=Neural+Hub', desc:'An interactive visualization powered by AI and Three.js.', yt:'2A3sX1z8-cQ', tools:['Three.js','AI','Node.js']}
+    ];
+    const grid=document.getElementById('projectsGrid');
+    projects.forEach((p,i)=>{
+      const d=document.createElement('div');
+      d.className='glass-card rounded-lg overflow-hidden hover:scale-105 transition duration-300 cursor-pointer';
+      d.innerHTML=`<img src="${p.img}" class="w-full h-60 object-cover"/><div class="p-4 text-left"><h3 class="font-heading text-xl text-white mb-1">${p.title}</h3><p class="text-sm text-gray-400">${p.desc}</p></div>`;
+      d.onclick=()=>openModal(p);
+      grid.appendChild(d);
+    });
+
+    /* === MODAL === */
+    const modal=document.getElementById('modal'), modalContent=document.getElementById('modalContent');
+    function openModal(p){
+      modal.classList.remove('hidden');
+      modalContent.innerHTML=`
+        <h2 class="font-heading text-2xl font-bold text-[#00FFFF] mb-4">${p.title}</h2>
+        <div class="relative w-full pb-[56.25%] mb-4">
+          <iframe class="absolute top-0 left-0 w-full h-full rounded-lg" src="https://www.youtube.com/embed/${p.yt}?autoplay=1&mute=1&loop=1&playlist=${p.yt}" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        </div>
+        <p class="mb-4">${p.desc}</p>
+        <div class="flex flex-wrap gap-2 mb-4">${p.tools.map(t=>`<span class='bg-gray-700 px-3 py-1 rounded-full text-sm'>${t}</span>`).join('')}</div>
+        <button id="aiDescribe" class="bg-[#39FF14] text-black font-bold py-2 px-5 rounded-full neon-btn">✨ Describe This Project (AI)</button>
+        <p id="aiOut" class="mt-3 text-[#39FF14]"></p>
+      `;
+      document.getElementById('aiDescribe').onclick=()=>{
+        document.getElementById('aiOut').textContent='“A futuristic masterpiece blending innovation and visual storytelling.”';
+      };
+    }
+    document.getElementById('closeModal').onclick=()=>modal.classList.add('hidden');
+    modal.onclick=e=>{if(e.target===modal)modal.classList.add('hidden');};
+
+    /* === CONTACT FORM === */
+    document.getElementById('contactForm').addEventListener('submit',e=>{
+      e.preventDefault();
+      document.getElementById('statusMsg').textContent='Message sent! (Simulation)';
+      e.target.reset();
+      setTimeout(()=>document.getElementById('statusMsg').textContent='',3000);
+    });
+    document.getElementById('year').textContent=new Date().getFullYear();
+  </script>
+</body>
+</html>
