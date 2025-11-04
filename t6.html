@@ -49,7 +49,7 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         /* Custom scrollbar */
-        body::-webkit-scrollbar {
+        /* body::-webkit-scrollbar {
             width: 8px;
         }
         body::-webkit-scrollbar-track {
@@ -59,7 +59,9 @@
             background-color: #39FF14;
             border-radius: 10px;
             border: 2px solid #0A0A0A;
-        }
+        } */
+
+        
         /* ADDED: Custom Cursor Style */
         .custom-cursor {
             position: fixed;
@@ -224,14 +226,14 @@
                             </p>
                         </div>
                         {/* UPDATED: Scroll down button CSS (bottom-12 to bottom-8) */}
-                        <button
-                            onClick={scrollToProjects}
-                            className="absolute bottom-8 left-1/2 -translate-x-1/2 text-gray-400 animate-bounce flex flex-col items-center group"
-                            aria-label="Scroll down to projects"
-                        >
-                            <span className="text-xs group-hover:text-white transition-colors">SCROLL</span>
-                            <MoveDown className="w-6 h-6 group-hover:text-white transition-colors" />
-                        </button>
+                        //<button
+                        //     onClick={scrollToProjects}
+                        //     className="absolute bottom-8 left-1/2 -translate-x-1/2 text-gray-400 animate-bounce flex flex-col items-center group"
+                        //     aria-label="Scroll down to projects"
+                        // >
+                        //     <span className="text-xs group-hover:text-white transition-colors">SCROLL</span>
+                        //     <MoveDown className="w-6 h-6 group-hover:text-white transition-colors" />
+                        // </button>
                     </div>
                 </section>
             );
