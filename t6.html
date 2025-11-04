@@ -19,6 +19,13 @@
             scroll-behavior: smooth;
             /* ADDED: Custom cursor enabled */
             cursor: none;
+            /* ADDED: Hide default scrollbar */
+            overflow: -moz-scrollbars-none; /* Firefox */
+            -ms-overflow-style: none;  /* IE and Edge */
+        }
+        /* ADDED: Hide scrollbar for Chrome, Safari, Opera */
+        body::-webkit-scrollbar {
+            display: none;
         }
         .font-heading {
             font-family: 'Orbitron', sans-serif;
@@ -48,19 +55,6 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        /* Custom scrollbar */
-        /* body::-webkit-scrollbar {
-            width: 8px;
-        }
-        body::-webkit-scrollbar-track {
-            background: #0A0A0A;
-        }
-        body::-webkit-scrollbar-thumb {
-            background-color: #39FF14;
-            border-radius: 10px;
-            border: 2px solid #0A0A0A;
-        } */
-
         
         /* ADDED: Custom Cursor Style */
         .custom-cursor {
@@ -92,11 +86,26 @@
             background-clip: text;
             text-fill-color: transparent;
         }
+
+        /* Modal scrollbar styling */
+        .modal-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .modal-scrollbar::-webkit-scrollbar-track {
+            background: rgba(16, 16, 16, 0.5); /* glass-card bg */
+            border-radius: 10px;
+        }
+        .modal-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #39FF14;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            background-clip: content-box;
+        }
     </style>
     
     <!-- 
-      React + Three.js CDN Setup (ESM)
-      This importmap tells the browser where to find the React & Three.js libraries.
+        React + Three.js CDN Setup (ESM)
+        This importmap tells the browser where to find the React & Three.js libraries.
     -->
     <!-- FIX: Added prop-types and updated lucide-react import -->
     <script type="importmap">
@@ -121,8 +130,8 @@
     <!-- ADDED: Custom cursor element --><div id="custom-cursor" class="custom-cursor"></div>
 
     <!-- 
-      The entire React Application.
-      This is a single-file React app using JSX, Tailwind, and React-Three-Fiber.
+        The entire React Application.
+        This is a single-file React app using JSX, Tailwind, and React-Three-Fiber.
     -->
     <!-- FIX: Changed type to "text/babel" and added data-type="module" for Babel -->
     <script type="text/babel" data-type="module">
@@ -225,15 +234,15 @@
                                 Creative Technologist · Game Designer · 3D Artist
                             </p>
                         </div>
-                        {/* UPDATED: Scroll down button CSS (bottom-12 to bottom-8) */}
-                        //<button
-                        //     onClick={scrollToProjects}
-                        //     className="absolute bottom-8 left-1/2 -translate-x-1/2 text-gray-400 animate-bounce flex flex-col items-center group"
-                        //     aria-label="Scroll down to projects"
-                        // >
-                        //     <span className="text-xs group-hover:text-white transition-colors">SCROLL</span>
-                        //     <MoveDown className="w-6 h-6 group-hover:text-white transition-colors" />
-                        // </button>
+                        {/* This is the "SCROLL" button you wanted removed. It is commented out. */}
+                        {/* <button
+                            onClick={scrollToProjects}
+                            className="absolute bottom-8 left-1/2 -translate-x-1/2 text-gray-400 animate-bounce flex flex-col items-center group"
+                            aria-label="Scroll down to projects"
+                         >
+                            <span className="text-xs group-hover:text-white transition-colors">SCROLL</span>
+                            <MoveDown className="w-6 h-6 group-hover:text-white transition-colors" />
+                         </button> */}
                     </div>
                 </section>
             );
@@ -476,7 +485,7 @@
             // Effect to stop modal scrolling background AND listen for Escape key
             useEffect(() => {
                 // Stop background scroll
-                document.body.style.overflow = 'hidden';
+                // document.body.style.overflow = 'hidden'; // This was causing the main page to lose its scroll position
                 
                 // ADDED: Listen for Escape key
                 const handleKeyDown = (e) => {
@@ -489,7 +498,7 @@
                 
                 // Cleanup function
                 return () => {
-                    document.body.style.overflow = 'auto';
+                    // document.body.style.overflow = 'auto';
                     document.removeEventListener('keydown', handleKeyDown);
                 };
             }, [onClose]); // Add onClose to dependency array
@@ -511,8 +520,8 @@
                             </button>
                         </div>
                         
-                        {/* Scrollable Content Area */}
-                        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                        {/* Scrollable Content Area: ADDED modal-scrollbar class */}
+                        <div className="flex-1 overflow-y-auto p-6 space-y-6 modal-scrollbar">
                             {/* Video Player */}
                             <div className="relative w-full pb-[56.25%] h-0">
                                 <iframe 
@@ -567,8 +576,15 @@
             const [selectedProject, setSelectedProject] = useState(null);
 
             // Handle modal state
-            const openModal = (project) => setSelectedProject(project);
-            const closeModal = () => setSelectedProject(null);
+            const openModal = (project) => {
+                setSelectedProject(project);
+                document.body.style.overflow = 'hidden'; // Stop main body scroll when modal is open
+            };
+            const closeModal = () => {
+                setSelectedProject(null);
+                document.body.style.overflow = 'auto'; // Restore main body scroll when modal is closed
+            };
+
 
             // Simple fade-in effect for sections
             useEffect(() => {
@@ -656,4 +672,3 @@
     </script>
 </body>
 </html>
-
