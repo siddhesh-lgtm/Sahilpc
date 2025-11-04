@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sahil Chaudhary | Creative Technologist</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Google Fonts (Orbitron for headings, Inter for body) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- FIX: Load Babel Standalone to transpile JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Custom Styles for Theme -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0A0A0A;
+            /* color: #E0E0E0; (Replaced by class on body) */
+            scroll-behavior: smooth;
+            /* ADDED: Custom cursor enabled */
+            cursor: none;
+        }
+        .font-heading {
+            font-family: 'Orbitron', sans-serif;
+        }
+        /* Neon Glow Effects */
+        .neon-shadow-lime {
+            box-shadow: 0 0 5px #39FF14, 0 0 15px #39FF14, 0 0 30px #39FF14;
+        }
+        .neon-shadow-magenta {
+            box-shadow: 0 0 5px #FF007A, 0 0 15px #FF007A, 0 0 30px #FF007A;
+        }
+        .neon-shadow-cyan {
+            box-shadow: 0 0 5px #00FFFF, 0 0 15px #00FFFF, 0 0 30px #00FFFF;
+        }
+        .neon-text-lime {
+            text-shadow: 0 0 2px #39FF14, 0 0 10px #39FF14, 0 0 20px #39FF14;
+        }
+        .neon-text-magenta {
+            text-shadow: 0 0 2px #FF007A, 0 0 10px #FF007A, 0 0 20px #FF007A;
+        }
+        .neon-text-cyan {
+            text-shadow: 0 0 2px #00FFFF, 0 0 10px #00FFFF, 0 0 20px #00FFFF;
+        }
+        /* Glassmorphism */
+        .glass-card {
+            background-color: rgba(16, 16, 16, 0.5); /* #101010 */
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        /* Custom scrollbar */
+        body::-webkit-scrollbar {
+            width: 8px;
+        }
+        body::-webkit-scrollbar-track {
+            background: #0A0A0A;
+        }
+        body::-webkit-scrollbar-thumb {
+            background-color: #39FF14;
+            border-radius: 10px;
+            border: 2px solid #0A0A0A;
+        }
+        /* ADDED: Custom Cursor Style */
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background-color: #FF007A;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: screen;
+            transition: transform 0.1s ease-out;
+            box-shadow: 0 0 5px #FF007A, 0 0 15px #FF007A;
+            left: 0;
+            top: 0;
+        }
+    </style>
+    
+    <!-- 
+      React + Three.js CDN Setup (ESM)
+      This importmap tells the browser where to find the React & Three.js libraries.
+    -->
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.3.1",
+        "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+        "react/jsx-dev-runtime": "https://esm.sh/react@18.3.1/jsx-dev-runtime",
+        "react-dom": "https://esm.sh/react-dom@18.3.1",
+        "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+        "three": "https://esm.sh/three@0.165.0",
+        "@react-three/fiber": "https://esm.sh/@react-three/fiber@8.16.8?external=react,react-dom,three",
+        "@react-three/drei": "https://esm.sh/@react-three/drei@9.107.0?external=react,react-dom,three,@react-three/fiber",
+        "lucide-react": "https://esm.sh/lucide-react@0.395.0?external=react"
+      }
+    }
+    </script>
+</head>
+<!-- ADDED: text-gray-200 to the body -->
+<body class="min-h-screen text-gray-200">
+    <!-- React will render the application here -->
+    <div id="root"></div>
+    <!-- ADDED: Custom cursor element -->
+    <div id="custom-cursor" class="custom-cursor"></div>
+
+    <!-- 
+      The entire React Application.
+      This is a single-file React app using JSX, Tailwind, and React-Three-Fiber.
+    -->
+    <!-- FIX: Changed type to "text/babel" and added data-type="module" for Babel -->
+    <script type="text/babel" data-type="module">
+        import React, { useState, Suspense, useRef, useEffect } from 'react';
+        import ReactDOM from 'react-dom/client';
+        import { Canvas, useFrame, useThree } from '@react-three/fiber';
+        import { OrbitControls, TorusKnot, Icosahedron, Stars } from '@react-three/drei';
+        import { Github, Youtube, Twitter, Mail, MoveDown, X } from 'lucide-react';
+
+        // --- Mock Data for Projects ---
+        const projectData = [
+            {
+                id: 1,
+                title: "Visual Redemption",
+                image: "https://placehold.co/600x400/FF007A/0A0A0A?text=Redemption",
+                youtubeId: "dQw4w9WgXcQ",
+                description: "A real-time VFX showcase exploring themes of cybernetic decay and digital rebirth. Built with Unreal Engine 5, Niagara, and custom shaders.",
+                tools: ["Unreal Engine 5", "Niagara", "HLSL", "Blender"]
+            },
+            {
+                id: 2,
+                title: "Cyber Deck",
+                image: "https://placehold.co/600x400/39FF14/0A0A0A?text=Cyber+Deck",
+                youtubeId: "bTqVqk7FSmY",
+                description: "A 3D-printable, functional cyberdeck prop with an integrated Raspberry Pi. Modeled in Blender and Fusion 360, focusing on modularity and a retro-futuristic aesthetic.",
+                tools: ["Blender", "Fusion 360", "Raspberry Pi", "3D Printing"]
+            },
+            {
+                id: 3,
+                title: "AI Neural Hub",
+                image: "https://placehold.co/600x400/00FFFF/0A0A0A?text=Neural+Hub",
+                youtubeId: "2A3sX1z8-cQ",
+                description: "An interactive data visualization art piece driven by a live sentiment analysis AI. Uses Three.js and a custom-trained model.",
+                tools: ["Three.js", "Gemini API", "React", "Node.js"]
+            }
+        ];
+
+        // --- NEW: Navbar Component ---
+        function Navbar() {
+            return (
+                <nav className="fixed top-0 left-0 right-0 z-50 p-4">
+                    {/* UPDATED: Removed glass-card for full transparency */}
+                    <div className="max-w-7xl mx-auto flex justify-between items-center p-4 rounded-lg">
+                        <a href="#hero" className="font-heading text-xl font-bold text-white hover:text-[#39FF14]">SAHIL<span className="text-[#39FF14]">V2</span></a>
+                        <div className="flex gap-6 text-sm">
+                            <a href="#projects" className="hover:text-[#00FFFF]">Projects</a>
+                            <a href="#about" className="hover:text-[#FF007A]">About</a>
+                            <a href="#contact" className="hover:text-[#39FF14]">Contact</a>
+                        </div>
+                    </div>
+                </nav>
+            );
+        }
+
+        // --- 1. Hero 3D Scene Component ---
+        function HeroScene() {
+            return (
+                <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
+                    <Suspense fallback={null}>
+                        <ambientLight intensity={0.2} />
+                        <pointLight position={[10, 10, 10]} intensity={1.5} color="#39FF14" />
+                        <pointLight position={[-10, -10, -5]} intensity={1} color="#FF007A" />
+                        
+                        {/* The rotating Torus Knot from your aesthetic */}
+                        <TorusKnot args={[1.8, 0.5, 200, 32]} rotation={[Math.PI / 4, 0, 0]}>
+                            <meshBasicMaterial wireframe={true} color="#39FF14" />
+                        </TorusKnot>
+                        
+                        <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+                        
+                        {/* Auto-rotates the scene */}
+                        <OrbitControls 
+                            enableZoom={false} 
+                            enablePan={false} 
+                            autoRotate 
+                            autoRotateSpeed={0.5} 
+                        />
+                    </Suspense>
+                </Canvas>
+            );
+        }
+
+        // --- 2. Hero Section Component ---
+        function HeroSection() {
+            const scrollToProjects = () => {
+                document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' });
+            };
+
+            return (
+                <section id="hero" className="relative h-screen w-full flex items-center justify-center overflow-hidden">
+                    {/* 3D Background */}
+                    <div className="absolute inset-0 z-0">
+                        <HeroScene />
+                    </div>
+                    
+                    {/* Overlay Content */}
+                    <div className="relative z-10 flex flex-col items-center text-center">
+                        <div className="glass-card p-6 sm:p-10 rounded-xl max-w-lg">
+                            <h1 className="font-heading text-4xl sm:text-6xl font-bold uppercase text-white neon-text-lime">
+                                Sahil Chaudhary <span className="text-[#39FF14]">STUDIOS</span>
+                            </h1>
+                            <p className="mt-4 text-lg sm:text-xl text-gray-300">
+                                Creative Technologist · Game Designer · 3D Artist
+                            </p>
+                        </div>
+                        <button
+                            onClick={scrollToProjects}
+                            className="absolute bottom-12 text-gray-400 animate-bounce flex flex-col items-center group"
+                            aria-label="Scroll down to projects"
+                        >
+                            <span className="text-xs group-hover:text-white transition-colors">SCROLL</span>
+                            <MoveDown className="w-6 h-6 group-hover:text-white transition-colors" />
+                        </button>
+                    </div>
+                </section>
+            );
+        }
+
+        // --- 3. Featured Projects Components ---
+        function ProjectCard({ project, onClick }) {
+            return (
+                <div 
+                    className="glass-card rounded-lg overflow-hidden cursor-pointer group relative transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-[#00FFFF]/30"
+                    onClick={() => onClick(project)}
+                >
+                    <img 
+                        src={project.image} 
+                        alt={project.title} 
+                        className="w-full h-60 object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 bg-black/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="text-center">
+                            <h3 className="font-heading text-2xl font-bold text-white">{project.title}</h3>
+                            <p className="mt-2 text-lg text-[#00FFFF] font-bold">VIEW →</p>
+                        </div>
+                    </div>
+                    {/* Static Border on Hover */}
+                    <div className="absolute inset-0 border-2 border-transparent group-hover:border-[#00FFFF] rounded-lg transition-all duration-300" />
+                </div>
+            );
+        }
+
+        function FeaturedProjectsSection({ onProjectClick }) {
+            return (
+                <section id="projects" className="py-24 px-4 sm:px-8 md:px-12 min-h-screen">
+                    <h2 className="font-heading text-4xl sm:text-5xl font-bold text-center mb-16 text-white neon-text-cyan">
+                        Featured <span className="text-[#00FFFF]">Projects</span>
+                    </h2>
+                    <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {projectData.map(project => (
+                            <ProjectCard key={project.id} project={project} onClick={onProjectClick} />
+                        ))}
+                    </div>
+                </section>
+            );
+        }
+
+        // --- 4. About Me Components ---
+        
+        // 1. Create a new component for the scene's *content*.
+        function AboutSceneContent() {
+            // This component is INSIDE <Canvas>, so hooks are safe here.
+            const meshRef = useRef();
+            useFrame((state, delta) => {
+                if (meshRef.current) {
+                    meshRef.current.rotation.x += delta * 0.1;
+                    meshRef.current.rotation.y += delta * 0.1;
+                }
+            });
+
+            return (
+                <>
+                    <ambientLight intensity={0.5} />
+                    <pointLight position={[5, 5, 5]} intensity={1} color="#FF007A" />
+                    <Icosahedron ref={meshRef} args={[1.5, 0]}>
+                        <meshBasicMaterial wireframe={true} color="#FF007A" />
+                    </Icosahedron>
+                </>
+            );
+        }
+
+        // 2. The original component now just renders the <Canvas>
+        //    and places the new content component inside it.
+        function AboutScene() {
+            return (
+                <Canvas camera={{ position: [0, 0, 3.5], fov: 50 }}>
+                    <Suspense fallback={null}>
+                        {/* Place the component with hooks inside Suspense */}
+                        <AboutSceneContent />
+                    </Suspense>
+                </Canvas>
+            );
+        }
+
+        function AboutMeSection() {
+            return (
+                <section id="about" className="py-24 px-4 sm:px-8 md:px-12 glass-card rounded-xl max-w-7xl mx-auto my-16">
+                    <h2 className="font-heading text-4xl sm:text-5xl font-bold text-center mb-16 text-white neon-text-magenta">
+                        About <span className="text-[#FF007A]">Me</span>
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                        {/* 3D Avatar/Object Column */}
+                        <div className="w-full h-80 rounded-lg overflow-hidden">
+                            <AboutScene />
+                        </div>
+                        {/* Text Content Column */}
+                        <div className="space-y-6 text-gray-300">
+                            <p className="text-lg leading-relaxed">
+                                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                            </p>
+                            <p className="text-lg leading-relaxed">
+                                Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                            </p>
+                            <a 
+                                href="#" 
+                                download 
+                                className="inline-block bg-[#FF007A] text-white font-bold py-3 px-6 rounded-full transition-all duration-300 hover:bg-white hover:text-[#FF007A] neon-shadow-magenta hover:shadow-lg hover:shadow-white/30"
+                            >
+                                Download Résumé (PDF)
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        // --- 5. Contact Section Component (UPDATED) ---
+        function ContactSection() {
+            return (
+                <section id="contact" className="py-24 px-4 sm:px-8 md:px-12 text-center">
+                    <h2 className="font-heading text-4xl sm:text-5xl font-bold mb-8 text-white neon-text-lime">
+                        Let's <span className="text-[#39FF14]">Connect</span>
+                    </h2>
+                    <div className="max-w-xl mx-auto space-y-8">
+                        {/* Email Contact */}
+                        <p className="text-lg text-gray-300">
+                            The best way to reach me is via email.
+                            <br/>
+                            <a 
+                                href="mailto:exapmle@dfdf.com" 
+                                className="text-[#39FF14] font-bold text-xl hover:underline neon-text-lime"
+                            >
+                                exapmle@dfdf.com
+                            </a>
+                        </p>
+                        
+                        <p className="text-lg text-gray-400">You can also find me on social media:</p>
+
+                        {/* Social Icons */}
+                        <div className="flex justify-center space-x-6 mt-8">
+                            <a href="#" aria-label="GitHub" className="text-gray-500 hover:text-[#39FF14] transition-colors duration-300 transform hover:scale-125"><Github size={28} /></a>
+                            <a href="#" aria-label="YouTube" className="text-gray-500 hover:text-[#FF007A] transition-colors duration-300 transform hover:scale-125"><Youtube size={28} /></a>
+                            <a href="#" aria-label="Twitter" className="text-gray-500 hover:text-[#00FFFF] transition-colors duration-300 transform hover:scale-125"><Twitter size={28} /></a>
+                            <a href="mailto:exapmle@dfdf.com" aria-label="Email" className="text-gray-500 hover:text-white transition-colors duration-300 transform hover:scale-125"><Mail size={28} /></a>
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+        
+        // --- 6. Project Modal Component ---
+        function ProjectModal({ project, onClose }) {
+            const [aiDescription, setAiDescription] = useState('');
+            const [isLoading, setIsLoading] = useState(false);
+            
+            // This is the Gemini API call simulation
+            const handleGeminiDescribe = async () => {
+                setIsLoading(true);
+                setAiDescription('');
+                
+                const apiKey = ""; // API key is injected by the platform
+                const baseApiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+                const systemPrompt = "You are a creative copywriter for a tech portfolio. Write a short, engaging description (2-3 sentences max) for the provided project title and its toolset. Focus on its futuristic function and design.";
+                const userQuery = `Write a description for the asset: "${project.title}", which was built using: ${project.tools.join(', ')}.`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                };
+
+                try {
+                    const response = await fetch(baseApiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorBody = await response.json();
+                        throw new Error(errorBody.error?.message || 'API response was not ok.');
+                    }
+
+                    const result = await response.json();
+                    const modelText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Description generation failed.";
+                    setAiDescription(modelText);
+
+                } catch (error) {
+                    console.error('Gemini API Error:', error);
+                    setAiDescription(`Error: ${error.message}. Check API key and console.`);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            
+            // Effect to stop modal scrolling background AND listen for Escape key
+            useEffect(() => {
+                // Stop background scroll
+                document.body.style.overflow = 'hidden';
+                
+                // ADDED: Listen for Escape key
+                const handleKeyDown = (e) => {
+                    if (e.key === 'Escape') {
+                        onClose();
+                    }
+                };
+                
+                document.addEventListener('keydown', handleKeyDown);
+                
+                // Cleanup function
+                return () => {
+                    document.body.style.overflow = 'auto';
+                    document.removeEventListener('keydown', handleKeyDown);
+                };
+            }, [onClose]); // Add onClose to dependency array
+
+            return (
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
+                    onClick={onClose}
+                >
+                    <div 
+                        className="glass-card w-full max-w-4xl max-h-[90vh] rounded-xl overflow-hidden flex flex-col"
+                        onClick={(e) => e.stopPropagation()} // Prevent modal close on content click
+                    >
+                        {/* Header with Close Button */}
+                        <div className="flex justify-between items-center p-4 border-b border-gray-700">
+                            <h2 className="font-heading text-2xl font-bold text-[#00FFFF]">{project.title}</h2>
+                            <button onClick={onClose} className="text-gray-400 hover:text-white">
+                                <X size={24} />
+                            </button>
+                        </div>
+                        
+                        {/* Scrollable Content Area */}
+                        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                            {/* Video Player */}
+                            <div className="relative w-full pb-[56.25%] h-0">
+                                <iframe 
+                                    src={`https://www.youtube.com/embed/${project.youtubeId}?autoplay=1&mute=1&loop=1&playlist=${project.youtubeId}`}
+                                    frameBorder="0" 
+                                    allow="autoplay; encrypted-media; gyroscope; picture-in-picture" 
+                                    allowFullScreen
+                                    className="absolute top-0 left-0 w-full h-full rounded-lg border border-gray-700"
+                                ></iframe>
+                            </div>
+                            
+                            {/* Project Details */}
+                            <div>
+                                <h3 className="font-heading text-xl font-semibold text-white mb-2">Description</h3>
+                                <p className="text-gray-300">{project.description}</p>
+                            </div>
+                            
+                            <div>
+                                <h3 className="font-heading text-xl font-semibold text-white mb-2">Tools Used</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {project.tools.map(tool => (
+                                        <span key={tool} className="bg-gray-700 text-gray-200 px-3 py-1 rounded-full text-sm font-medium">
+                                            {tool}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Gemini AI Feature */}
+                            <div>
+                                <button
+                                    onClick={handleGeminiDescribe}
+                                    disabled={isLoading}
+                                    className="bg-[#39FF14] text-black font-bold py-2 px-5 rounded-full text-sm transition-all duration-300 hover:bg-white disabled:bg-gray-600 disabled:cursor-not-allowed neon-shadow-lime"
+                                >
+                                    {isLoading ? 'Generating...' : '✨ Describe This Project (AI)'}
+                                </button>
+                                {aiDescription && (
+                                    <div className="mt-4 p-4 bg-gray-900 border border-[#39FF14] rounded-lg">
+                                        <p className="text-gray-200">{aiDescription}</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // --- 7. Main App Component ---
+        function App() {
+            const [selectedProject, setSelectedProject] = useState(null);
+
+            // Handle modal state
+            const openModal = (project) => setSelectedProject(project);
+            const closeModal = () => setSelectedProject(null);
+
+            // Simple fade-in effect for sections
+            useEffect(() => {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('opacity-100', 'translate-y-0');
+                            entry.target.classList.remove('opacity-0', 'translate-y-5');
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                document.querySelectorAll('section').forEach(section => {
+                    if (section.id !== 'hero') {
+                        section.classList.add('opacity-0', 'translate-y-5', 'transition-all', 'duration-1000', 'ease-out');
+                        observer.observe(section);
+                    }
+                });
+            }, []);
+            
+            // ADDED: Custom cursor effect
+            useEffect(() => {
+                const cursor = document.getElementById('custom-cursor');
+                if (!cursor) return;
+                
+                const onMouseMove = (e) => {
+                    cursor.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+                };
+                
+                window.addEventListener('mousemove', onMouseMove);
+                
+                return () => {
+                    window.removeEventListener('mousemove', onMouseMove);
+                };
+            }, []);
+
+            return (
+                <>
+                    {/* ADDED: Navbar component */}
+                    <Navbar />
+                    <main>
+                        <HeroSection />
+                        <FeaturedProjectsSection onProjectClick={openModal} />
+                        <AboutMeSection />
+                        <ContactSection />
+                    </main>
+                    
+                    <footer className="text-center p-8 text-gray-600 border-t border-gray-800">
+                        &copy; {new Date().getFullYear()} RAZED V2 STUDIOS. All rights reserved.
+                    </footer>
+
+                    {/* Modal */}
+                    {selectedProject && (
+                        <ProjectModal project={selectedProject} onClose={closeModal} />
+                    )}
+                </>
+            );
+        }
+
+        // --- Mount the React App ---
+        const container = document.getElementById('root');
+        const root = ReactDOM.createRoot(container);
+        root.render(<App />);
+
+    </script>
+</body>
+</html>
+
